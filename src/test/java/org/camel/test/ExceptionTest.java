@@ -11,39 +11,19 @@ class ExceptionTest extends CamelTestSupport {
 		return new RouteBuilder() {
 			@Override
 			public void configure() throws Exception {
-				//@formatter:off
-				onException(Exception.class)
-					.handled(true)
-					.to("mock:result3");
-
-				from("direct:a")
-					.doTry()
-						.to("direct:b")
-						.to("mock:result1")
-					.endDoTry()
-					.doCatch(Exception.class)
-						.to("mock:result2")
-					.end();
-
-				from("direct:b")
-					.onException(Exception.class)
-						.handled(true)
-						.to("mock:result4")
-					.end()
-					.throwException(new IllegalArgumentException("Forced"))
-					.to("mock:result5");
-				//@formatter:on
+				this.getCamelContext().addRoutes(new RouteA());
+				this.getCamelContext().addRoutes(new RouteB());
 			}
 		};
 	}
 
 	@Test
 	void testException() throws InterruptedException {
-		getMockEndpoint("mock:result1").expectedMessageCount(0);
-		getMockEndpoint("mock:result2").expectedMessageCount(0);
-		getMockEndpoint("mock:result3").expectedMessageCount(0);
-		getMockEndpoint("mock:result4").expectedMessageCount(1);
-		getMockEndpoint("mock:result5").expectedMessageCount(0);
+		getMockEndpoint("mock:resultA1").expectedMessageCount(0);
+		getMockEndpoint("mock:resultA2").expectedMessageCount(0);
+		getMockEndpoint("mock:resultA3").expectedMessageCount(0);
+		getMockEndpoint("mock:resultB1").expectedMessageCount(0);
+		getMockEndpoint("mock:resultB2").expectedMessageCount(1);
 
 		template.sendBody("direct:a", "Test");
 
