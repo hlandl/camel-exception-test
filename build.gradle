@@ -10,9 +10,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.camel:camel-core:3.14.5'
+	def camelVersion = "3.11.1"
+	//def camelVersion = "3.14.5"
+    implementation 'org.apache.camel:camel-core:'+camelVersion
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testImplementation 'org.apache.camel:camel-test-junit5:3.14.5'
+    testImplementation 'org.apache.camel:camel-test-junit5:'+camelVersion
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 

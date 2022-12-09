@@ -1,17 +1,15 @@
 package org.camel.test;
 
-import java.util.Map.Entry;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 
-public class RouteA extends RouteBuilder {
+public class RouteSplitCaller extends RouteBuilder {
 
 	/**
-	 * Creates a new RouteA.
+	 * Creates a new RouteSplitCaller.
 	 */
-	public RouteA() {
+	public RouteSplitCaller() {
 		super();
 	}
 
@@ -25,36 +23,43 @@ public class RouteA extends RouteBuilder {
 			.handled(false)
 			.logStackTrace(false)
 			.logExhausted(false)
+			.to("mock:splitCallerError");
+
+		from("direct:splitcaller")
 			.process(new Processor() {
 				
 				@Override
 				public void process(Exchange exchange) throws Exception {
-					Print.all("A Error", exchange);
+					Print.all("SC Start", exchange);
 				}
 			})
-			.to("mock:AError");
-
-		from("direct:a")
 			.doTry()
 				.process(new Processor() {
 					
 					@Override
 					public void process(Exchange exchange) throws Exception {
-						Print.all("A Start", exchange);
+						Print.all("SC Try", exchange);
 					}
 				})
-				.to("direct:b")
+				.to("direct:split")
+				.to("mock:splitCallerSuccess")
 				.process(new Processor() {
 					
 					@Override
 					public void process(Exchange exchange) throws Exception {
-						Print.all("A After", exchange);
+						Print.all("SC Try-End", exchange);
 					}
 				})
-				.to("mock:AOK")
 			.endDoTry()
 			.doCatch(Exception.class)
-				.to("mock:ACatch")
+				.process(new Processor() {
+					
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						Print.all("SC Catch", exchange);
+					}
+				})
+				.to("mock:splitCallerCatch")
 			.end();
 
 	}
