@@ -1,5 +1,7 @@
 package org.camel.test;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 
 public class RouteB extends RouteBuilder {
@@ -20,11 +22,25 @@ public class RouteB extends RouteBuilder {
 			.handled(true)
 			.logStackTrace(false)
 			.logExhausted(false)
-			.to("mock:resultB2");
+			.process(new Processor() {
+				
+				@Override
+				public void process(Exchange exchange) throws Exception {
+					Print.all("B Error", exchange);
+				}
+			})
+			.to("mock:BError");
 
 		from("direct:b")
+			.process(new Processor() {
+				
+				@Override
+				public void process(Exchange exchange) throws Exception {
+					Print.all("B Before Error", exchange);
+				}
+			})
 			.throwException(new IllegalArgumentException("Forced"))
-			.to("mock:resultB1");
+			.to("mock:BOK");
 
 	}
 
